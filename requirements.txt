@@ -1,0 +1,8 @@
+customtkinter
+scikit-learn
+pillow
+numpy
+joblib
+pandas
+matplotlib
+seaborn
