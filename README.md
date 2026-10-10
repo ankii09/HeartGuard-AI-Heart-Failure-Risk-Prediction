@@ -75,6 +75,3 @@ The current project version achieved approximately 83.3% test accuracy using a R
 - customtkinter
 - Pillow
 
-## Resume-Friendly Summary
-
-> Developed a heart failure prediction system using clinical records to classify patient risk levels. Built a machine learning pipeline in Python with data preprocessing, exploratory analysis, model evaluation, and feature importance analysis. Also created an interactive GUI for real-time risk prediction.
