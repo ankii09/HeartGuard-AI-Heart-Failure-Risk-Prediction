@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/predict.py": {
+      "includeFiles": "{models/**,reports/**,index.html,styles.css,app.js}"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
