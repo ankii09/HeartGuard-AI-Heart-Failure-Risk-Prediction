@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="HeartGuard AI educational heart failure dataset explorer and machine learning demo."
+    />
+    <meta name="theme-color" content="#f5f8fc" />
+    <title>HeartGuard AI | Clinical Data Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="HeartGuard AI home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M16 27S4.5 20.2 4.5 11.8A6.4 6.4 0 0 1 16 8.3a6.4 6.4 0 0 1 11.5 3.5C27.5 20.2 16 27 16 27Z"/><path d="M7.5 16h5l2-4 3.2 8 2.2-4h4.6"/></svg>
+          </span>
+          <span class="brand-name">HeartGuard <b>AI</b><small>CLINICAL DATA EXPLORER</small></span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <button class="nav-link active" data-view="prediction">Dashboard</button>
+          <button class="nav-link" data-view="performance">Model performance</button>
+          <button class="nav-link" data-view="about">About</button>
+        </nav>
+        <span class="topbar-tag"><span class="live-dot"></span> EDUCATIONAL DEMO</span>
+      </header>
+
+      <main>
+        <section id="prediction-view" class="view active">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">MACHINE LEARNING SANDBOX</p>
+              <h1>Clinical data <span>overview</span></h1>
+              <p class="heading-copy">Explore how a trained model responds to a sample of clinical measurements.</p>
+            </div>
+            <div class="dataset-chip"><span class="chip-icon">▦</span><span>UCI Heart Failure Clinical Records<small>299 observations · 12 input features</small></span></div>
+          </div>
+
+          <div class="notice-banner">
+            <span class="notice-icon">i</span>
+            <p><b>Educational model — not a clinical tool.</b> Outputs are not a diagnosis, medical advice, or a measure of clinical risk. Do not use for diagnosis or treatment.</p>
+            <span class="notice-dismiss" aria-hidden="true">×</span>
+          </div>
+
+          <section class="summary-grid" aria-label="Model overview">
+            <article class="summary-card">
+              <span class="summary-icon blue">◈</span>
+              <div><small>MODEL</small><strong id="summary-model">Random Forest</strong><span id="summary-version">Version v2.0.0</span></div>
+            </article>
+            <article class="summary-card">
+              <span class="summary-icon teal">⌁</span>
+              <div><small>TEST ACCURACY</small><strong id="summary-accuracy">—</strong><span>Held-out test split</span></div>
+            </article>
+            <article class="summary-card">
+              <span class="summary-icon violet">▤</span>
+              <div><small>TEST SAMPLES</small><strong id="summary-test-samples">—</strong><span>Untouched test data</span></div>
+            </article>
+            <article class="summary-card">
+              <span class="summary-icon amber">◎</span>
+              <div><small>CLASS THRESHOLD</small><strong id="summary-threshold">0.50</strong><span>Positive class decision rule</span></div>
+            </article>
+          </section>
+
+          <div class="dashboard-grid">
+            <section class="panel input-panel">
+              <div class="panel-heading">
+                <div><span class="section-kicker">INPUT PROFILE</span><h2>Patient measurements</h2></div>
+                <span class="panel-icon">⌗</span>
+              </div>
+              <p class="panel-description">Enter values within the model's observed training-data ranges. No values are adjusted automatically.</p>
+              <form id="prediction-form" novalidate>
+                <div id="field-groups" class="field-groups"></div>
+                <div id="form-error" class="form-error" role="alert" hidden></div>
+                <button id="submit-button" class="primary-button" type="submit">
+                  <span class="button-label">Run model prediction</span><span class="button-arrow">→</span>
+                </button>
+              </form>
+              <p class="form-footnote">All fields are required. Binary values must be 0 or 1.</p>
+            </section>
+
+            <section class="panel output-panel">
+              <div class="panel-heading">
+                <div><span class="section-kicker">MODEL OUTPUT</span><h2>Prediction summary</h2></div>
+                <span id="result-state" class="result-state">AWAITING INPUT</span>
+              </div>
+              <div id="empty-result" class="empty-result">
+                <div class="empty-art"><span>♡</span><i></i><i></i><i></i></div>
+                <h3>Your result will appear here</h3>
+                <p>Complete the input profile and run the model to view its predicted dataset class and output probabilities.</p>
+              </div>
+              <div id="prediction-result" hidden>
+                <div class="result-overview">
+                  <div class="result-copy">
+                    <span id="class-pill" class="class-pill">CLASS 0</span>
+                    <h3 id="class-label">—</h3>
+                    <p>Predicted dataset label</p>
+                  </div>
+                  <div class="probability-gauge" role="img" aria-label="Positive class probability">
+                    <svg viewBox="0 0 240 145" aria-hidden="true">
+                      <path class="gauge-track" d="M 25 125 A 95 95 0 0 1 215 125" pathLength="100" />
+                      <path id="gauge-value" class="gauge-value" d="M 25 125 A 95 95 0 0 1 215 125" pathLength="100" />
+                    </svg>
+                    <strong id="gauge-percent">—%</strong>
+                    <small>POSITIVE CLASS PROBABILITY</small>
+                  </div>
+                </div>
+                <div class="probability-pair">
+                  <div><span class="prob-dot positive"></span><span>Class 1 probability</span><b id="positive-probability">—</b></div>
+                  <div><span class="prob-dot negative"></span><span>Class 0 probability</span><b id="negative-probability">—</b></div>
+                </div>
+                <div class="threshold-note"><span>Decision threshold</span><b id="result-threshold">0.50</b><span>class 1 when probability ≥ threshold</span></div>
+                <div class="result-disclaimer"><b>Interpretation:</b> the probability is a model output, not confidence or clinical certainty. Dataset target: <span id="target-definition">—</span></div>
+              </div>
+              <div class="subsection-title"><span>SUBMITTED INPUT SUMMARY</span><small id="input-summary-count">12 FEATURES</small></div>
+              <div id="input-summary" class="input-summary empty-summary"><p>Submitted values will be listed here after prediction.</p></div>
+            </section>
+          </div>
+
+          <section class="panel signal-panel">
+            <div class="panel-heading">
+              <div><span class="section-kicker">MODEL INTERPRETATION</span><h2>Feature signals</h2></div>
+              <button class="text-button" data-view="performance">View model performance <span>→</span></button>
+            </div>
+            <p class="panel-description">Global feature importance describes how this model uses features overall. Local sensitivity changes one feature at a time around the training-set mean; these values are not additive explanations or medical causes.</p>
+            <div class="signals-grid">
+              <div class="signal-column"><h3>Top global feature importance</h3><div id="global-signals" class="signal-list"><p class="muted">Loading model information…</p></div></div>
+              <div class="signal-column"><h3>Local one-feature sensitivity</h3><div id="local-signals" class="signal-list"><p class="muted">Run a prediction to see local sensitivity.</p></div></div>
+            </div>
+          </section>
+          <footer class="page-footer"><span>HeartGuard AI · Educational machine learning demo</span><span>Not validated for clinical use</span></footer>
+        </section>
+
+        <section id="performance-view" class="view">
+          <div class="page-heading">
+            <div><p class="eyebrow">MODEL EVALUATION</p><h1>Performance <span>overview</span></h1><p class="heading-copy">Metrics and curves evaluated on the held-out test partition.</p></div>
+            <div class="dataset-chip"><span class="chip-icon">⌁</span><span>Final test evaluation<small>No tuning on test data</small></span></div>
+          </div>
+          <div class="metrics-grid" id="metrics-grid"><p class="muted">Loading evaluation metrics…</p></div>
+          <div class="performance-grid">
+            <article class="panel chart-panel"><div class="panel-heading"><div><span class="section-kicker">TEST SPLIT</span><h2>ROC curve</h2></div><b id="roc-value" class="chart-stat">AUC —</b></div><img src="/reports/roc_curve.png" alt="Receiver operating characteristic curve for the held-out test split" /></article>
+            <article class="panel chart-panel"><div class="panel-heading"><div><span class="section-kicker">TEST SPLIT</span><h2>Precision-recall curve</h2></div><b id="pr-value" class="chart-stat">PR-AUC —</b></div><img src="/reports/pr_curve.png" alt="Precision-recall curve for the held-out test split" /></article>
+          </div>
+          <div class="performance-grid">
+            <article class="panel"><div class="panel-heading"><div><span class="section-kicker">CLASSIFICATION</span><h2>Confusion matrix</h2></div></div><div id="confusion-matrix" class="confusion-matrix"><p class="muted">Loading…</p></div><p class="chart-caption">Rows are actual labels; columns are predicted labels. Class 1 is the recorded death-event target.</p></article>
+            <article class="panel"><div class="panel-heading"><div><span class="section-kicker">VALIDATION COMPARISON</span><h2>Candidate models</h2></div></div><div class="table-wrap"><table><thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th><th>PR-AUC</th></tr></thead><tbody id="comparison-table"><tr><td colspan="7">Loading…</td></tr></tbody></table></div><p class="chart-caption">Candidate comparison uses validation data; test metrics above are for the selected model only.</p></article>
+          </div>
+          <footer class="page-footer"><span>HeartGuard AI · Educational machine learning demo</span><span>Not validated for clinical use</span></footer>
+        </section>
+
+        <section id="about-view" class="view">
+          <div class="page-heading"><div><p class="eyebrow">TRANSPARENCY</p><h1>About this <span>model</span></h1><p class="heading-copy">Dataset provenance, training methodology, and limitations.</p></div></div>
+          <div class="about-grid">
+            <article class="panel"><span class="section-kicker">DATA & TRAINING</span><h2>How the model was built</h2><dl id="model-details" class="details-list"><div><dt>Loading model information…</dt><dd></dd></div></dl></article>
+            <article class="panel caution-panel"><span class="section-kicker">IMPORTANT LIMITATIONS</span><h2>Educational use only</h2><p id="about-notice">This model is not clinically validated and must not be used for diagnosis or treatment.</p><ul><li>Dataset relationships do not establish medical causation.</li><li>Model probabilities are not calibrated confidence estimates.</li><li>Performance on the test data does not guarantee performance on new populations.</li><li>Do not use this demo to make health decisions.</li></ul></article>
+          </div>
+          <footer class="page-footer"><span>HeartGuard AI · Educational machine learning demo</span><span>Not validated for clinical use</span></footer>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+  </body>
+</html>

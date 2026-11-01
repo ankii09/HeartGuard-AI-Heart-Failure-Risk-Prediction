@@ -1,0 +1,133 @@
+{
+  "dataset_source": "UCI Heart Failure Clinical Records, archive.ics.uci.edu",
+  "target_definition": {
+    "field": "DEATH_EVENT",
+    "positive_class": 1,
+    "negative_class": 0,
+    "description": "1 = death event occurred during follow-up; 0 = no death event was recorded."
+  },
+  "training_samples": 254,
+  "validation_samples": 45,
+  "test_samples": 45,
+  "num_features": 12,
+  "training_methodology": "Stratified train/validation/test split (70/15/15) with feature scaling applied only on the training split. The best validation set model was selected via ROC-AUC before final retraining on train+validation and evaluation on the untouched test set.",
+  "cross_validation": {
+    "strategy": "Hold-out validation",
+    "selected_model": "Random Forest",
+    "validation_auc": 0.9311
+  },
+  "classification_threshold": 0.5,
+  "model_version": "v2.0.0",
+  "training_date_utc": "2026-10-30T19:21:04.687913+00:00",
+  "educational_notice": "This is an educational machine learning model for research and demonstration. It is not clinically validated and must not be used for diagnosis or treatment.",
+  "model_comparison": [
+    {
+      "model": "DummyClassifier",
+      "metrics": {
+        "accuracy": 0.4889,
+        "precision": 0.1667,
+        "recall": 0.1333,
+        "f1": 0.1481,
+        "confusion_matrix": [
+          [
+            20,
+            10
+          ],
+          [
+            13,
+            2
+          ]
+        ],
+        "threshold": 0.5,
+        "roc_auc": 0.6333,
+        "pr_auc": 0.4222
+      }
+    },
+    {
+      "model": "Logistic Regression",
+      "metrics": {
+        "accuracy": 0.8444,
+        "precision": 0.8333,
+        "recall": 0.6667,
+        "f1": 0.7407,
+        "confusion_matrix": [
+          [
+            28,
+            2
+          ],
+          [
+            5,
+            10
+          ]
+        ],
+        "threshold": 0.5,
+        "roc_auc": 0.9178,
+        "pr_auc": 0.8643
+      }
+    },
+    {
+      "model": "Random Forest",
+      "metrics": {
+        "accuracy": 0.8667,
+        "precision": 1.0,
+        "recall": 0.6,
+        "f1": 0.75,
+        "confusion_matrix": [
+          [
+            30,
+            0
+          ],
+          [
+            6,
+            9
+          ]
+        ],
+        "threshold": 0.5,
+        "roc_auc": 0.9311,
+        "pr_auc": 0.8967
+      }
+    },
+    {
+      "model": "Gradient Boosting",
+      "metrics": {
+        "accuracy": 0.8222,
+        "precision": 0.8889,
+        "recall": 0.5333,
+        "f1": 0.6667,
+        "confusion_matrix": [
+          [
+            29,
+            1
+          ],
+          [
+            7,
+            8
+          ]
+        ],
+        "threshold": 0.5,
+        "roc_auc": 0.8933,
+        "pr_auc": 0.8097
+      }
+    }
+  ],
+  "test_metrics": {
+    "accuracy": 0.8,
+    "precision": 0.6923,
+    "recall": 0.6429,
+    "f1": 0.6667,
+    "confusion_matrix": [
+      [
+        27,
+        4
+      ],
+      [
+        5,
+        9
+      ]
+    ],
+    "threshold": 0.5,
+    "roc_auc": 0.8698,
+    "pr_auc": 0.7949
+  },
+  "selected_model": "Random Forest"
+}
