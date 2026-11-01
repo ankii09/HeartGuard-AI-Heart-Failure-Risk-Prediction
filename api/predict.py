@@ -1,17 +1,26 @@
 import json
+import logging
 import math
-from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse
 from sklearn.pipeline import Pipeline
 
 
+logger = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parent.parent
 MODEL_PATH = ROOT / "models" / "heart_failure_pipeline.pkl"
 METADATA_PATH = ROOT / "models" / "model_metadata.json"
+STATIC_REPORTS = {
+    "feature_importance.png",
+    "roc_curve.png",
+    "pr_curve.png",
+    "local_explanation.png",
+}
 FEATURES = [
     ("age", "Age", 40.0, 95.0, "years", "Patient age in years."),
     ("anaemia", "Anaemia", 0.0, 1.0, "yes/no", "Whether anaemia was present (1 = yes, 0 = no)."),
@@ -184,42 +193,65 @@ def predict(payload):
     }
 
 
-class handler(BaseHTTPRequestHandler):
-    def _send_json(self, status_code, body):
-        encoded = json.dumps(body).encode("utf-8")
-        self.send_response(status_code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(encoded)))
-        self.end_headers()
-        self.wfile.write(encoded)
+app = FastAPI(title="HeartGuard AI")
 
-    def do_GET(self):
-        if self.path.rstrip("/") != "/api/predict":
-            self._send_json(404, {"error": "Not found."})
-            return
-        try:
-            self._send_json(200, dashboard_data())
-        except Exception as exc:
-            self._send_json(500, {"error": f"Unable to load model information: {exc}"})
 
-    def do_POST(self):
-        if self.path.rstrip("/") != "/api/predict":
-            self._send_json(404, {"error": "Not found."})
-            return
+@app.get("/", include_in_schema=False)
+async def index():
+    return FileResponse(ROOT / "index.html")
+
+
+@app.get("/styles.css", include_in_schema=False)
+async def stylesheet():
+    return FileResponse(ROOT / "styles.css", media_type="text/css")
+
+
+@app.get("/app.js", include_in_schema=False)
+async def javascript():
+    return FileResponse(ROOT / "app.js", media_type="text/javascript")
+
+
+@app.get("/reports/{filename}", include_in_schema=False)
+async def report(filename: str):
+    if filename not in STATIC_REPORTS:
+        raise HTTPException(status_code=404, detail="Report not found.")
+    report_path = ROOT / "reports" / filename
+    if not report_path.is_file():
+        raise HTTPException(status_code=404, detail="Report not found.")
+    return FileResponse(report_path, media_type="image/png")
+
+
+@app.get("/api/predict")
+async def get_dashboard_data():
+    try:
+        return dashboard_data()
+    except Exception as exc:
+        logger.exception("Could not load dashboard model data")
+        raise HTTPException(status_code=500, detail="Model information is temporarily unavailable.") from exc
+
+
+@app.post("/api/predict")
+async def post_prediction(request: Request):
+    content_length = request.headers.get("content-length")
+    if content_length:
         try:
-            content_length = int(self.headers.get("Content-Length", "0"))
-            if content_length <= 0 or content_length > 16384:
-                self._send_json(400, {"error": "Request body is empty or too large."})
-                return
-            payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
-            self._send_json(200, predict(payload))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            self._send_json(400, {"error": "Request body must be valid JSON."})
+            if int(content_length) > 16384:
+                raise HTTPException(status_code=413, detail="Request body is too large.")
         except ValueError as exc:
-            self._send_json(400, {"error": str(exc)})
-        except Exception as exc:
-            self._send_json(500, {"error": f"Prediction failed: {exc}"})
+            raise HTTPException(status_code=400, detail="Invalid Content-Length header.") from exc
 
-    def log_message(self, format, *args):
-        return
+    raw_body = await request.body()
+    if not raw_body or len(raw_body) > 16384:
+        raise HTTPException(status_code=400, detail="Request body is empty or too large.")
+    try:
+        payload = json.loads(raw_body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.") from exc
+
+    try:
+        return predict(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Prediction failed")
+        raise HTTPException(status_code=500, detail="Prediction could not be completed.") from exc
